@@ -93,7 +93,7 @@ get '/artist/:artist/album/:album/song/:song/?' do |artist, album, song|
 	if Music[artist] and Music[artist][album] and Music[artist][album][song]
 		html <<-HTML
 			<span id="song_title">#{song}</span> by <span id="artist">#{artist}</span> (<span>#{album}</span>)<br/>
-			<audio src='/#{CGI.escapeHTML Music[artist][album][song].path}' autobuffer controls >
+			<audio src='/#{CGI.escapeHTML Music[artist][album][song].path}' autobuffer controls></audio>
 		HTML
 	else
 		html "Could not find #{song} on #{album} for #{artist}."
