@@ -38,12 +38,9 @@ root = Pathname.new ARGV[0]
 #Make song files public
 set :public, ARGV[0]
 
-$stderr.puts "Loading song information..."
-
 #Grab information from all the song files
 Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}" do |file|
 	begin
-		puts "Checking #{file}"
 		info = TagLib2::File.new(file)
 
 		artist, album, title, track = info.artist, info.album, info.title, info.track
