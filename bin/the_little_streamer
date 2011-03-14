@@ -9,7 +9,7 @@ require 'cgi'
 require 'pathname'
 
 #Supply a directory with all the music in it
-abort "Need a path to the music!" unless ARGV[0]
+abort "Point me to the music!" unless ARGV[0]
 
 #Wrap up in HTML
 def html body
