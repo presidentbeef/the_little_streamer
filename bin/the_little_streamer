@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #This is a simple Sinatra application to play mp3/ogg files through a browser
 #using the HTML5 audio tag
 
