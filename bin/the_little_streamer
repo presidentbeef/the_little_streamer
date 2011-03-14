@@ -39,6 +39,9 @@ root = Pathname.new ARGV[0]
 #Make song files public
 set :public, ARGV[0]
 
+#Make sure Sinatra sings
+set :run, true
+
 #Grab information from all the song files
 Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}" do |file|
 	begin
