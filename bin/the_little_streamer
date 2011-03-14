@@ -27,8 +27,89 @@ def link root, path, text = path
 	"<a href='#{root}#{CGI.escape path}'>#{text}</a>"
 end
 
+#Audio tag
+def audio path
+	"<audio id='player' onEnded='javascript:play_next()' src='/#{CGI.escapeHTML path}' autobuffer controls>You need the power of HTML5!</audio>"
+end
+
+#Javascript for playlist
+def playlist songs
+	<<-JAVASCRIPT
+	<script type="text/javascript">
+		var player = document.getElementById('player');
+		var artist = document.getElementById('artist');
+		var album = document.getElementById('album');
+		var title = document.getElementById('song_title');
+		var playlist = [#{songs.map { |s| song_to_js s }.join "," }]
+		var current_song = 0;
+		play_next = function(reverse) {
+			if(reverse && current_song > 0)
+				current_song--;
+			else if(current_song < playlist.length)
+				current_song++;
+			else
+				return;
+
+			var song = playlist[current_song];
+			player.src = song.path;
+			artist.innerHTML = song.artist
+			album.innerHTML = song.album
+			title.innerHTML = song.title
+			player.play();
+		}
+	</script>
+	JAVASCRIPT
+end
+
+#Javascript for a song
+def song_to_js song
+	<<-JAVASCRIPT
+	{ artist: #{song.artist.inspect},
+		album: #{song.album.inspect},
+		title: #{song.title.inspect},
+		path: #{(CGI.escapeHTML "/" << song.path).inspect} }
+	JAVASCRIPT
+end
+
+#HTML for playing all songs by artist
+def play_artist artist
+	songs = []
+
+	Music[artist].each_value do |album|
+		album.values.sort_by { |s| s.track }.each do |song|
+			songs << song
+		end
+	end
+
+	html <<-HTML
+		#{song_info songs.first}<br/>
+		#{audio songs.first.path}
+		#{playlist songs}
+	HTML
+end
+
+#HTML for playing all songs on an album
+def play_album artist, album
+	songs = Music[artist][album].values.sort_by { |s| s.track }
+
+	html <<-HTML
+		#{song_info songs.first}<br/>
+		#{audio songs.first.path}
+		#{playlist songs}
+	HTML
+end
+
+#HTML for song information header
+def song_info song
+	"<span id='song_title'>#{song.title}</span> by <span id='artist'>#{song.artist}</span> (<span id='album'>#{song.album}</span>)"
+end
+
 #Storing all music information in here
-Music = {}
+Music = Hash.new do |h,k|
+	h[k] = Hash.new do |hash, key|
+		hash[key] = Hash.new
+	end
+end
 
 #Song information
 Song = Struct.new :artist, :album, :title, :track, :path
@@ -54,8 +135,6 @@ Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}" do |file|
 
 		if title
 			[artist, album, title].each { |i| i.tr!('/', '-') }
-			Music[artist] ||= {}
-			Music[artist][album] ||= {}
 			Music[artist][album][title] = Song.new(artist, album, title, track, Pathname.new(file).relative_path_from(root).to_s)
 		end
 	rescue Exception => e
@@ -73,7 +152,7 @@ end
 
 #List albums by given artist
 get '/artist/:artist/?' do |artist|
-	if Music[artist]
+	unless Music[artist].empty?
 		path = "/artist/#{artist}/album/"
 		html Music[artist].keys.sort.map { |a| link path, a }.join "<br/>"
 	else
@@ -81,9 +160,18 @@ get '/artist/:artist/?' do |artist|
 	end
 end
 
+#Play songs by given artist
+get '/artist/:artist/play/?' do |artist|
+	unless Music[artist].empty?
+		play_artist artist
+	else
+		html "Could not find #{artist}."
+	end
+end
+
 #List songs on given album
 get '/artist/:artist/album/:album/?' do |artist, album|
-	if Music[artist] and Music[artist][album]
+	unless Music[artist][album].empty?
 		path = "/artist/#{artist}/album/#{album}/song/"
 		html Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join "<br/>"
 	else
@@ -91,14 +179,23 @@ get '/artist/:artist/album/:album/?' do |artist, album|
 	end
 end
 
+#Play all songs from a given album
+get '/artist/:artist/album/:album/play/?' do |artist, album|
+	if Music[artist][album]
+		play_album artist, album
+	else
+		html "Could not find #{album} by #{artist}."
+	end
+end
+
 #Play song!
-get '/artist/:artist/album/:album/song/:song/?' do |artist, album, song|
-	if Music[artist] and Music[artist][album] and Music[artist][album][song]
+get '/artist/:artist/album/:album/song/:song/?' do |artist, album, title|
+	if song = Music[artist][album][title]
 		html <<-HTML
-			<span id="song_title">#{song}</span> by <span id="artist">#{artist}</span> (<span>#{album}</span>)<br/>
-			<audio src='/#{CGI.escapeHTML Music[artist][album][song].path}' autobuffer controls></audio>
+			#{song_info song}<br/>
+			#{audio song.path}
 		HTML
 	else
-		html "Could not find #{song} on #{album} for #{artist}."
+		html "Could not find #{title} on #{album} for #{artist}."
 	end
 end
