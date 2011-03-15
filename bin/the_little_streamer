@@ -142,7 +142,7 @@ Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}" do |file|
 	end
 end
 
-GC.start
+GC.start #Clean up after TagLib2
 
 #List artists
 get '/' do
