@@ -156,7 +156,7 @@ get '/artist/:artist/?' do |artist|
 		path = "/artist/#{artist}/album/"
 		html Music[artist].keys.sort.map { |a| link path, a }.join "<br/>"
 	else
-		html "Could not find #{artist}."
+		html "Could not find <b>#{artist}</b>."
 	end
 end
 
@@ -165,7 +165,7 @@ get '/artist/:artist/play/?' do |artist|
 	unless Music[artist].empty?
 		play_artist artist
 	else
-		html "Could not find #{artist}."
+		html "Could not find <b>#{artist}</b>."
 	end
 end
 
@@ -175,7 +175,7 @@ get '/artist/:artist/album/:album/?' do |artist, album|
 		path = "/artist/#{artist}/album/#{album}/song/"
 		html Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join "<br/>"
 	else
-		html "Could not find #{album} for #{artist}."
+		html "Could not find <b>#{album}</b> for <b>#{artist}</b>."
 	end
 end
 
@@ -184,7 +184,7 @@ get '/artist/:artist/album/:album/play/?' do |artist, album|
 	if Music[artist][album]
 		play_album artist, album
 	else
-		html "Could not find #{album} by #{artist}."
+		html "Could not find <b>#{album}</b> by <b>#{artist}</b>."
 	end
 end
 
@@ -196,6 +196,6 @@ get '/artist/:artist/album/:album/song/:song/?' do |artist, album, title|
 			#{audio song.path}
 		HTML
 	else
-		html "Could not find #{title} on #{album} for #{artist}."
+		html "Could not find <b>#{title}</b> on <b>#{album}</b> by <b>#{artist}</b>."
 	end
 end
