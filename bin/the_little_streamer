@@ -74,6 +74,11 @@ def song_to_js song
 	JAVASCRIPT
 end
 
+#Back/forward links
+def prev_and_next
+	"<a href='javascript:play_next(true)'>Prev</a>&nbsp;&nbsp;&nbsp;<a href='javascript:play_next()'>Next</a>"
+end
+
 #HTML for playing all songs by artist
 def play_artist artist
 	songs = []
@@ -86,7 +91,8 @@ def play_artist artist
 
 	html <<-HTML
 		#{song_info songs.first}<br/>
-		#{audio songs.first.path}
+		#{audio songs.first.path}<br/>
+		#{prev_and_next}
 		#{playlist songs}
 	HTML
 end
@@ -97,7 +103,8 @@ def play_album artist, album
 
 	html <<-HTML
 		#{song_info songs.first}<br/>
-		#{audio songs.first.path}
+		#{audio songs.first.path}<br/>
+		#{prev_and_next}
 		#{playlist songs}
 	HTML
 end
