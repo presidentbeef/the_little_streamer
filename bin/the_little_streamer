@@ -30,7 +30,7 @@ end
 #Audio tag
 def audio path
 	<<-HTML
-	<audio id='player' onEnded='javascript:play_next()' src='/#{CGI.escapeHTML path}' autobuffer controls autoplay >
+	<audio id='player' onEnded='javascript:play_next()' src=#{("/" << CGI.escapeHTML(path)).inspect} autobuffer controls autoplay >
 		You need the power of HTML5!
 	</audio>
 	<script type="text/javascript">
