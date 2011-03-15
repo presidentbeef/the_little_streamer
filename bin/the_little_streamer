@@ -164,7 +164,8 @@ end
 get '/artist/:artist/?' do |artist|
 	unless Music[artist].empty?
 		path = "/artist/#{artist}/album/"
-		html Music[artist].keys.sort.map { |a| link path, a }.join "<br/>"
+		html Music[artist].keys.sort.map { |a| link path, a }.join("<br/>") << "<br/><br/>" <<
+			link("/artist/#{artist}/", "play", "Play All")
 	else
 		html "Could not find <b>#{artist}</b>."
 	end
@@ -183,7 +184,8 @@ end
 get '/artist/:artist/album/:album/?' do |artist, album|
 	unless Music[artist][album].empty?
 		path = "/artist/#{artist}/album/#{album}/song/"
-		html Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join "<br/>"
+		html Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join("<br/>") << "<br/><br/>" <<
+			link("/artist/#{artist}/album/#{album}/", "play", "Play All")
 	else
 		html "Could not find <b>#{album}</b> for <b>#{artist}</b>."
 	end
