@@ -48,7 +48,7 @@ def playlist songs
 		play_next = function(reverse) {
 			if(reverse && current_song > 0)
 				current_song--;
-			else if(current_song < playlist.length)
+			else if(!reverse && current_song < playlist.length)
 				current_song++;
 			else
 				return;
