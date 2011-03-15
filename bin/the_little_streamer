@@ -33,6 +33,9 @@ def audio path
 	<audio id='player' onEnded='javascript:play_next()' src='/#{CGI.escapeHTML path}' autobuffer controls autoplay >
 		You need the power of HTML5!
 	</audio>
+	<script type="text/javascript">
+		document.getElementById('player').volume = 0.3;
+	</script>
 	HTML
 end
 
@@ -46,8 +49,6 @@ def playlist songs
 		var title = document.getElementById('song_title');
 		var playlist = [#{songs.map { |s| song_to_js s }.join "," }]
 		var current_song = 0;
-
-		player.volume = 0.3; //Seems to like being at max - ouch
 
 		play_next = function(reverse) {
 			if(reverse && current_song > 0)
