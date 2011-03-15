@@ -29,7 +29,11 @@ end
 
 #Audio tag
 def audio path
-	"<audio id='player' onEnded='javascript:play_next()' src='/#{CGI.escapeHTML path}' autobuffer controls>You need the power of HTML5!</audio>"
+	<<-HTML
+	<audio id='player' onEnded='javascript:play_next()' src='/#{CGI.escapeHTML path}' autobuffer controls autoplay >
+		You need the power of HTML5!
+	</audio>
+	HTML
 end
 
 #Javascript for playlist
