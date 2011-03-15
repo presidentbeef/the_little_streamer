@@ -10,7 +10,7 @@ Extremely simple music streamer using Sinatra.
 
     the_little_streamer /path/to/music
 
-Browse to http://localhost:4567
+Browse to [http://localhost:4567](http://localhost:4567)
 
 ## Dependencies
 
