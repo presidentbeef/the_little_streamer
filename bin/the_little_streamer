@@ -42,6 +42,9 @@ def playlist songs
 		var title = document.getElementById('song_title');
 		var playlist = [#{songs.map { |s| song_to_js s }.join "," }]
 		var current_song = 0;
+
+		player.volume = 0.3; //Seems to like being at max - ouch
+
 		play_next = function(reverse) {
 			if(reverse && current_song > 0)
 				current_song--;
