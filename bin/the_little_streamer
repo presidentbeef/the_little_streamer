@@ -139,7 +139,7 @@ set :public, ARGV[0]
 set :run, true
 
 #Grab information from all the song files
-Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}" do |file|
+Dir.glob(ARGV[0..-1].map {|a| "#{a}/**/*.{mp3,ogg}"}) do |file|
   begin
     info = TagLib2::File.new(file)
 
