@@ -15,11 +15,39 @@ abort "Point me to the music!" unless ARGV[0]
 def html body
   <<-HTML
     <html>
+      <head>
+        <style type="text/css">
+          #{css}
+        </style>
+      </head>
       <body>
         #{body}
       </body>
     </html>
   HTML
+end
+
+def css
+  <<-CSS
+  body {
+    font-family: Helvetica,Verdana,Arial,sans-serif;
+    font-size: 13pt;
+  }
+
+  span#title {
+    font-size: 14pt;
+    font-weight: bold;
+  }
+
+  span#artist {
+    font-size: 14pt;
+    font-weight: bold;
+  }
+
+  span#album {
+    font-style: italic;
+  }
+  CSS
 end
 
 #Create a link
@@ -46,7 +74,7 @@ def playlist songs
     var player = document.getElementById('player');
     var artist = document.getElementById('artist');
     var album = document.getElementById('album');
-    var title = document.getElementById('song_title');
+    var title = document.getElementById('title');
     var playlist = [#{songs.map { |s| song_to_js s }.join "," }]
     var current_song = 0;
 
@@ -116,7 +144,7 @@ end
 
 #HTML for song information header
 def song_info song
-  "<span id='song_title' style='font-weight: bold'>#{song.title}</span> by <span id='artist'>#{song.artist}</span> (<span id='album'>#{song.album}</span>)"
+  "<span id='title'>#{song.title}</span> by <span id='artist'>#{song.artist}</span><br/><span id='album'>#{song.album}</span>"
 end
 
 #Storing all music information in here
