@@ -116,7 +116,7 @@ end
 
 #HTML for song information header
 def song_info song
-  "\"<span id='song_title'>#{song.title}</span>\" by <span id='artist'>#{song.artist}</span> (<span id='album'>#{song.album}</span>)"
+  "<span id='song_title' style='font-weight: bold'>#{song.title}</span> by <span id='artist'>#{song.artist}</span> (<span id='album'>#{song.album}</span>)"
 end
 
 #Storing all music information in here
