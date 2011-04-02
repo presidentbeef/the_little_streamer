@@ -126,7 +126,7 @@ def play_artist artist
   html <<-HTML
     #{song_info songs.first}<br/>
     #{audio songs.first.path}<br/>
-    #{prev_and_next}
+    #{prev_and_next if songs.length > 1}
     #{playlist songs}
   HTML
 end
@@ -138,7 +138,7 @@ def play_album artist, album
   html <<-HTML
     #{song_info songs.first}<br/>
     #{audio songs.first.path}<br/>
-    #{prev_and_next}
+    #{prev_and_next if songs.length > 1}
     #{playlist songs}
   HTML
 end
