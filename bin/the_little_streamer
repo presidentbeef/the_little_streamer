@@ -52,7 +52,8 @@ end
 
 #Create a link
 def link root, path, text = path
-  "<a href='#{root}#{CGI.escape path}'>#{text}</a>"
+  full_path = root.split('/').map! {|r| CGI.escape r }.join('/') << "/" << CGI.escape(path)
+  "<a href=\"#{full_path}\">#{text}</a>"
 end
 
 #Audio tag
