@@ -51,9 +51,10 @@ def css
 end
 
 #Create a link
-def link root, path, text = path
+def link root, path, text = path, params = {}
   full_path = root.split('/').map! {|r| CGI.escape r }.join('/') << "/" << CGI.escape(path)
-  "<a href=\"#{full_path}\">#{text}</a>"
+  params = params.map { |k, v| "#{k}=#{v}" }.join "&"
+  "<a href=\"#{full_path}?#{params}\">#{text}</a>"
 end
 
 #Audio tag
@@ -114,12 +115,23 @@ def prev_and_next
 end
 
 #HTML for playing all songs by artist
-def play_artist artist
+def play_artist artist, order = "normal"
   songs = []
 
-  Music[artist].each_value do |album|
-    album.values.sort_by { |s| s.track }.each do |song|
-      songs << song
+  case order
+  when "random"
+    Music[artist].each_value do |album|
+      album.each_value do |song|
+        songs << song
+      end
+    end
+
+    songs.shuffle!
+  else
+    Music[artist].each_value do |album|
+      album.values.sort_by { |s| s.track }.each do |song|
+        songs << song
+      end
     end
   end
 
@@ -132,8 +144,14 @@ def play_artist artist
 end
 
 #HTML for playing all songs on an album
-def play_album artist, album
-  songs = Music[artist][album].values.sort_by { |s| s.track }
+def play_album artist, album, order = "normal"
+
+  case order
+  when "random"
+    songs = Music[artist][album].values.shuffle!
+  else
+    songs = Music[artist][album].values.sort_by { |s| s.track }
+  end
 
   html <<-HTML
     #{song_info songs.first}<br/>
@@ -199,7 +217,9 @@ get '/artist/:artist/?' do |artist|
   unless Music[artist].empty?
     path = "/artist/#{artist}/album/"
     html Music[artist].keys.sort.map { |a| link path, a }.join("<br/>") << "<br/><br/>" <<
-      link("/artist/#{artist}/", "play", "Play All")
+      link("/artist/#{artist}/", "play", "Play All") << " - " <<
+      link("/artist/#{artist}/", "play", "Randomly", :order => :random)
+
   else
     html "Could not find <b>#{artist}</b>."
   end
@@ -208,7 +228,7 @@ end
 #Play songs by given artist
 get '/artist/:artist/play/?' do |artist|
   unless Music[artist].empty?
-    play_artist artist
+    play_artist artist, params["order"]
   else
     html "Could not find <b>#{artist}</b>."
   end
@@ -219,7 +239,8 @@ get '/artist/:artist/album/:album/?' do |artist, album|
   unless Music[artist][album].empty?
     path = "/artist/#{artist}/album/#{album}/song/"
     html Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join("<br/>") << "<br/><br/>" <<
-      link("/artist/#{artist}/album/#{album}/", "play", "Play All")
+      link("/artist/#{artist}/album/#{album}/", "play", "Play All") << " - " <<
+      link("/artist/#{artist}/album/#{album}/", "play", "Randomly", :order => :random)
   else
     html "Could not find <b>#{album}</b> for <b>#{artist}</b>."
   end
@@ -228,7 +249,7 @@ end
 #Play all songs from a given album
 get '/artist/:artist/album/:album/play/?' do |artist, album|
   if Music[artist][album]
-    play_album artist, album
+    play_album artist, album, params["order"]
   else
     html "Could not find <b>#{album}</b> by <b>#{artist}</b>."
   end
