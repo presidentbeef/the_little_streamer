@@ -18,7 +18,7 @@ Browse to [http://localhost:4567](http://localhost:4567)
  * [ruby-taglib2](https://github.com/rumblehq/ruby-taglib2)
  * A browser that supports HTML5, like [Chrome](http://www.google.com/chrome/)
 
-You may also want to use [Mongrel](https://github.com/fauna/mongrel) instead of WEBrick, as it will be way faster. Just install it and Sinatra will prefer it over WEBrick.
+You are strongly encouraged to use [Mongrel](https://github.com/fauna/mongrel) instead of WEBrick, as it will be way faster. Just install it and Sinatra will prefer it over WEBrick.
 
 ## License
 
