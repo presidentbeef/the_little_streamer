@@ -123,6 +123,34 @@ def player_html songs
     #{playlist_js songs}
   HTML
 end
+
+def play_all limit = 100, order = "normal"
+  songs = []
+
+  case order
+  when "random"
+    Music.values.each do |artist|
+      artist.values.each do |album|
+        album.values.each do |song|
+          songs << song
+        end
+      end
+    end
+
+    songs.shuffle!
+  else
+    Music.values.each do |artist|
+      artist.values.each do |album|
+        album.values.sort_by { |s| s.track }.each do |song|
+          songs << song
+        end
+      end
+    end
+  end
+
+  player_html songs[0..limit.to_i]
+end
+
 #HTML for playing all songs by artist
 def play_artist artist, order = "normal"
   songs = []
@@ -208,7 +236,17 @@ GC.start #Clean up after TagLib2
 #List artists
 get '/' do
   path = '/artist/'
-  html Music.keys.sort.map { |a| link path, a }.join "<br/>"
+  html <<-HTML
+    #{Music.keys.sort.map { |a| link path, a }.join "<br/>"}<br/><br/>
+    Random
+    #{link("/", "all", "10", :limit => 10, :order => :random)}
+    #{link("/", "all", "50", :limit => 50, :order => :random) }
+    #{link("/", "all", "100", :limit => 100, :order => :random) }
+  HTML
+end
+
+get '/all' do
+  play_all params["limit"], params["order"]
 end
 
 #List albums by given artist
