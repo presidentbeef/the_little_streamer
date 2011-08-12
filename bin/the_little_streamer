@@ -21,7 +21,9 @@ def html body
         </style>
       </head>
       <body>
-        #{body}
+        <div id="main">
+          #{body}
+        </div>
       </body>
     </html>
   HTML
@@ -47,6 +49,19 @@ def css
   span#album {
     font-style: italic;
   }
+
+  div#playlist {
+    float: left;
+    margin-top: 15px;
+    height: 80%;
+    overflow: auto;
+    text-align: left;
+  }
+
+  div#main {
+    float: left;
+    text-align: center;
+  }
   CSS
 end
 
@@ -69,8 +84,26 @@ def audio path
   HTML
 end
 
+#HTML for displaying playlist
+def playlist_html songs
+  list = []
+
+  songs.each_with_index do |song, i|
+    list << "<li><a href=\"javascript:play_index(#{i})\">#{song.artist} - #{song.title}</a></li>"
+  end
+
+  <<-HTML
+    <div style="clear:both">&nbsp;</div>
+    <div id="playlist">
+      <ol>
+        #{list.join}
+      </ol>
+    </div>
+  HTML
+end
+
 #Javascript for playlist
-def playlist songs
+def playlist_js songs
   <<-JAVASCRIPT
   <script type="text/javascript">
     var player = document.getElementById('player');
@@ -88,12 +121,21 @@ def playlist songs
       else
         return;
 
+      play_current();
+    }
+
+    play_current = function() {
       var song = playlist[current_song];
       player.src = song.path;
       artist.innerHTML = song.artist
       album.innerHTML = song.album
       title.innerHTML = song.title
       player.play();
+    }
+
+    play_index = function(index) {
+      current_song = index;
+      play_current();  
     }
   </script>
   JAVASCRIPT
@@ -121,6 +163,7 @@ def player_html songs
     #{audio songs.first.path}<br/>
     #{prev_and_next if songs.length > 1}
     #{playlist_js songs}
+    #{playlist_html songs if songs.length > 1}
   HTML
 end
 
