@@ -21,9 +21,7 @@ def html body
         </style>
       </head>
       <body>
-        <div id="main">
-          #{body}
-        </div>
+        #{body}
       </body>
     </html>
   HTML
@@ -58,7 +56,7 @@ def css
     text-align: left;
   }
 
-  div#main {
+  div#playerbox {
     float: left;
     text-align: center;
   }
@@ -159,11 +157,13 @@ end
 #Output HTML for player
 def player_html songs
   html <<-HTML
-    #{song_info songs.first}<br/>
-    #{audio songs.first.path}<br/>
-    #{prev_and_next if songs.length > 1}
-    #{playlist_js songs}
-    #{playlist_html songs if songs.length > 1}
+    <div id="playerbox">
+      #{song_info songs.first}<br/>
+      #{audio songs.first.path}<br/>
+      #{prev_and_next if songs.length > 1}
+      #{playlist_js songs}
+      #{playlist_html songs if songs.length > 1}
+    </div>
   HTML
 end
 
