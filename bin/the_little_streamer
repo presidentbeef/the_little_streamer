@@ -114,6 +114,15 @@ def prev_and_next
   "<a href='javascript:play_next(true)'>Prev</a>&nbsp;&nbsp;&nbsp;<a href='javascript:play_next()'>Next</a>"
 end
 
+#Output HTML for player
+def player_html songs
+  html <<-HTML
+    #{song_info songs.first}<br/>
+    #{audio songs.first.path}<br/>
+    #{prev_and_next if songs.length > 1}
+    #{playlist_js songs}
+  HTML
+end
 #HTML for playing all songs by artist
 def play_artist artist, order = "normal"
   songs = []
@@ -135,12 +144,7 @@ def play_artist artist, order = "normal"
     end
   end
 
-  html <<-HTML
-    #{song_info songs.first}<br/>
-    #{audio songs.first.path}<br/>
-    #{prev_and_next if songs.length > 1}
-    #{playlist songs}
-  HTML
+  player_html songs
 end
 
 #HTML for playing all songs on an album
@@ -153,12 +157,7 @@ def play_album artist, album, order = "normal"
     songs = Music[artist][album].values.sort_by { |s| s.track }
   end
 
-  html <<-HTML
-    #{song_info songs.first}<br/>
-    #{audio songs.first.path}<br/>
-    #{prev_and_next if songs.length > 1}
-    #{playlist songs}
-  HTML
+  player_html songs
 end
 
 #HTML for song information header
