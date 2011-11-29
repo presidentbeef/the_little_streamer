@@ -291,11 +291,12 @@ GC.start #Clean up after TagLib2
 get '/' do
   path = '/artist/'
   html <<-HTML
-    #{Music.keys.sort.map { |a| link path, a }.join "<br/>"}<br/><br/>
-    Random
+    (Random
     #{link("/", "all", "10", :limit => 10, :order => :random)}
     #{link("/", "all", "50", :limit => 50, :order => :random) }
-    #{link("/", "all", "100", :limit => 100, :order => :random) }
+    #{link("/", "all", "100", :limit => 100, :order => :random) })<br/>
+
+    #{Music.keys.sort.map { |a| link path, a }.join "<br/>"}<br/><br/>
   HTML
 end
 
