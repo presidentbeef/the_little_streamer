@@ -54,8 +54,26 @@ def css
     font-weight: bold;
   }
 
+  span#artist a {
+    text-decoration: none;
+    color: black;
+   }
+
+  span#artist a:hover {
+    text-decoration: underline;
+  }
+
   span#album {
     font-style: italic;
+  }
+
+  span#album a {
+    text-decoration: none;
+    color: black;
+  }
+
+  span#album a:hover {
+    text-decoration: underline;
   }
 
   div#playlist {
@@ -244,7 +262,7 @@ end
 
 #HTML for song information header
 def song_info song
-  "<span id='title'>#{song.title}</span> by <span id='artist'>#{song.artist}</span><br/><span id='album'>#{song.album}</span>"
+  "<span id='title'>#{song.title}</span> by <span id='artist'>#{link "/artist/", song.artist}</span><br/><span id='album'>#{link "/artist/#{song.artist}/album", song.album}</span>"
 end
 
 #Storing all music information in here
