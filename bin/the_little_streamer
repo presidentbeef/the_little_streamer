@@ -272,8 +272,9 @@ Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}", File::FNM_CASEFOLD do |file|
     info = TagLib2::File.new(file)
 
     artist, album, title, track = info.artist, info.album, info.title, info.track
-    artist ||= "Unknown"
-    album ||= "Unknown"
+    artist = "Unknown" if artist.nil? or artist.empty?
+    album = "Unknown" if album.nil? or album.empty?
+    
     info = nil
 
     if title
@@ -294,7 +295,7 @@ get '/' do
     (Random
     #{link("/", "all", "10", :limit => 10, :order => :random)}
     #{link("/", "all", "50", :limit => 50, :order => :random) }
-    #{link("/", "all", "100", :limit => 100, :order => :random) })<br/>
+    #{link("/", "all", "100", :limit => 100, :order => :random) })<br/><hr/>
 
     #{Music.keys.sort.map { |a| link path, a }.join "<br/>"}<br/><br/>
   HTML
