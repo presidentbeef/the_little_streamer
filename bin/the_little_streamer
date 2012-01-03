@@ -11,6 +11,11 @@ require 'pathname'
 #Supply a directory with all the music in it
 abort "Point me to the music!" unless ARGV[0]
 
+trap "INT" do
+  $stderr.puts "Exiting..."
+  exit!
+end
+
 #Wrap up in HTML
 def html body
   <<-HTML
