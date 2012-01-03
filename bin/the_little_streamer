@@ -289,6 +289,12 @@ set :public, ARGV[0]
 #Make sure Sinatra sings
 set :run, true
 
+$stderr.puts "Scanning music..."
+
+old_stderr = $stderr.dup
+
+$stderr.reopen("/dev/null", "w")
+
 #Grab information from all the song files
 Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}", File::FNM_CASEFOLD do |file|
   begin
@@ -308,6 +314,8 @@ Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}", File::FNM_CASEFOLD do |file|
     $stderr.puts e if $DEBUG
   end
 end
+
+$stderr = old_stderr
 
 GC.start #Clean up after TagLib2
 
