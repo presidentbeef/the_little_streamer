@@ -382,10 +382,7 @@ end
 #Play song!
 get '/artist/:artist/album/:album/song/:song/?' do |artist, album, title|
   if song = Music[artist][album][title]
-    html <<-HTML
-      #{song_info song}<br/>
-      #{audio song.path}
-    HTML
+    player_html [song]
   else
     html "Could not find <b>#{title}</b> on <b>#{album}</b> by <b>#{artist}</b>."
   end
