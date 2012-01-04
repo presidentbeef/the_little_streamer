@@ -103,6 +103,15 @@ def link root, path, text = path, params = {}
   "<a href=\"#{full_path}?#{params}\">#{text}</a>"
 end
 
+#Some navigation
+def title artist, album = nil
+  if album
+    "<h3>#{link "/", "", "Music"} : #{link "/artist/", artist, artist} : #{album}</h3>"
+  else
+    "<h3>#{link "/", "", "Music"} : #{artist}</h3>"
+  end
+end
+
 #Audio tag
 def audio path
   <<-HTML
@@ -197,6 +206,7 @@ def player_html songs
       #{prev_and_next if songs.length > 1}
       #{playlist_js songs}
       #{playlist_html songs if songs.length > 1}
+      #{link "/", "", "Back to All Music"}
     </div>
   HTML
 end
@@ -340,7 +350,8 @@ end
 get '/artist/:artist/?' do |artist|
   unless Music[artist].empty?
     path = "/artist/#{artist}/album/"
-    html Music[artist].keys.sort.map { |a| link path, a }.join("<br/>") << "<br/><br/>" <<
+    html title(artist) <<
+      Music[artist].keys.sort.map { |a| link path, a }.join("<br/>") << "<br/><br/>" <<
       link("/artist/#{artist}/", "play", "Play All") << " - " <<
       link("/artist/#{artist}/", "play", "Randomly", :order => :random)
 
@@ -362,7 +373,8 @@ end
 get '/artist/:artist/album/:album/?' do |artist, album|
   unless Music[artist][album].empty?
     path = "/artist/#{artist}/album/#{album}/song/"
-    html Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join("<br/>") << "<br/><br/>" <<
+    html title(artist, album) <<
+      Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join("<br/>") << "<br/><br/>" <<
       link("/artist/#{artist}/album/#{album}/", "play", "Play All") << " - " <<
       link("/artist/#{artist}/album/#{album}/", "play", "Randomly", :order => :random)
   else
