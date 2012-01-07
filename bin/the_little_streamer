@@ -115,7 +115,7 @@ end
 #Audio tag
 def audio path
   <<-HTML
-  <audio id='player' onEnded='javascript:play_next()' src=#{("/" << CGI.escapeHTML(path)).inspect} autobuffer controls autoplay >
+  <audio id='player' onEnded='javascript:play_next()' src=#{("/" << CGI.escape(path)).inspect} autobuffer controls autoplay >
     You need the power of HTML5!
   </audio>
   <script type="text/javascript">
@@ -185,10 +185,10 @@ end
 #Javascript for a song
 def song_to_js song
   <<-JAVASCRIPT
-  { artist: #{song.artist.inspect},
-    album: #{song.album.inspect},
+  { artist: #{link("/artist", song.artist, song.artist).inspect},
+    album: #{link("/artist/#{song.artist}/album/", song.album, song.album).inspect},
     title: #{song.title.inspect},
-    path: #{(CGI.escapeHTML "/" << song.path).inspect} }
+    path: #{(CGI.escapeHTML "/" << CGI.escape(song.path)).inspect} }
   JAVASCRIPT
 end
 
