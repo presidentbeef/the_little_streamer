@@ -32,7 +32,7 @@ def html body
       <script>
       if(document.getElementById('artist')) {
         window.onload = function() {
-         var artist = document.getElementById('artist').innerHTML;
+         var artist = document.getElementById('artist').firstChild.innerText;
          var title = document.getElementById('title').innerHTML;
          document.title = title + " by " + artist;
         }
@@ -170,7 +170,7 @@ def playlist_js songs
       artist.innerHTML = song.artist
       album.innerHTML = song.album
       title.innerHTML = song.title
-      document.title = song.title + " by " + song.artist;
+      document.title = song.title + " by " + artist.firstChild.innerText;
       player.play();
     }
 
