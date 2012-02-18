@@ -294,7 +294,7 @@ Song = Struct.new :artist, :album, :title, :track, :path
 root = Pathname.new ARGV[0]
 
 #Make song files public
-set :public, ARGV[0]
+set :public_folder, ARGV[0]
 
 #Make sure Sinatra sings
 set :run, true
