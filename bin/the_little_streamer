@@ -6,6 +6,7 @@ require 'rubygems'
 require 'taglib2'
 require 'sinatra'
 require 'cgi'
+require 'uri'
 require 'pathname'
 
 #Supply a directory with all the music in it
@@ -98,7 +99,7 @@ end
 
 #Create a link
 def link root, path, text = path, params = {}
-  full_path = root.split('/').map! {|r| CGI.escape r }.join('/') << "/" << CGI.escape(path)
+  full_path = root.split('/').map! {|r| URI.escape r }.join('/') << "/" << URI.escape(path)
   params = params.map { |k, v| "#{k}=#{v}" }.join "&"
   "<a href=\"#{full_path}?#{params}\">#{text}</a>"
 end
@@ -115,7 +116,7 @@ end
 #Audio tag
 def audio path
   <<-HTML
-  <audio id='player' onEnded='javascript:play_next()' src=#{("/" << CGI.escape(path)).inspect} autobuffer controls autoplay >
+  <audio id='player' onEnded='javascript:play_next()' src=#{("/" << URI.escape(path)).inspect} autobuffer controls autoplay >
     You need the power of HTML5!
   </audio>
   <script type="text/javascript">
