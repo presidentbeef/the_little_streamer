@@ -1,0 +1,7 @@
+require 'cgi'
+require 'uri'
+require 'the_little_streamer/song'
+require 'the_little_streamer/finder'
+require 'the_little_streamer/music'
+require 'the_little_streamer/html'
+require 'the_little_streamer/player'

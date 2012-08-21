@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 #This is a simple Sinatra application to play mp3/ogg files through a browser
 #using the HTML5 audio tag
+$LOAD_PATH.unshift "./lib"
 
 require 'rubygems'
-require 'taglib2'
 require 'sinatra'
-require 'cgi'
-require 'uri'
 require 'pathname'
+require 'the_little_streamer'
 
 #Supply a directory with all the music in it
 abort "Point me to the music!" unless ARGV[0]
@@ -16,280 +15,6 @@ trap "INT" do
   $stderr.puts "Exiting..."
   exit!
 end
-
-#Wrap up in HTML
-def html body
-  <<-HTML
-    <html>
-      <head>
-        <style type="text/css">
-          #{css}
-        </style>
-        <title>The Little Streamer</title>
-      </head>
-      <body>
-        #{body}
-      </body>
-      <script>
-      if(document.getElementById('artist')) {
-        window.onload = function() {
-         var artist = document.getElementById('artist').firstChild.innerText;
-         var title = document.getElementById('title').innerHTML;
-         document.title = title + " by " + artist;
-        }
-      }
-      </script>
-    </html>
-  HTML
-end
-
-def css
-  <<-CSS
-  body {
-    font-family: Helvetica,Verdana,Arial,sans-serif;
-    font-size: 13pt;
-  }
-
-  span#title {
-    font-size: 14pt;
-    font-weight: bold;
-  }
-
-  span#artist {
-    font-size: 14pt;
-    font-weight: bold;
-  }
-
-  span#artist a {
-    text-decoration: none;
-    color: black;
-   }
-
-  span#artist a:hover {
-    text-decoration: underline;
-  }
-
-  span#album {
-    font-style: italic;
-  }
-
-  span#album a {
-    text-decoration: none;
-    color: black;
-  }
-
-  span#album a:hover {
-    text-decoration: underline;
-  }
-
-  div#playlist {
-    float: left;
-    margin-top: 15px;
-    height: 80%;
-    overflow: auto;
-    text-align: left;
-  }
-
-  div#playerbox {
-    float: left;
-    text-align: center;
-  }
-  CSS
-end
-
-#Create a link
-def link root, path, text = path, params = {}
-  full_path = root.split('/').map! {|r| URI.escape r }.join('/') << "/" << URI.escape(path)
-  params = params.map { |k, v| "#{k}=#{v}" }.join "&"
-  "<a href=\"#{full_path}?#{params}\">#{text}</a>"
-end
-
-#Some navigation
-def title artist, album = nil
-  if album
-    "<h3>#{link "/", "", "Music"} : #{link "/artist/", artist, artist} : #{album}</h3>"
-  else
-    "<h3>#{link "/", "", "Music"} : #{artist}</h3>"
-  end
-end
-
-#Audio tag
-def audio path
-  <<-HTML
-  <audio id='player' onEnded='javascript:play_next()' src=#{("/" << URI.escape(path)).inspect} autobuffer controls autoplay >
-    You need the power of HTML5!
-  </audio>
-  <script type="text/javascript">
-    document.getElementById('player').volume = 0.3;
-  </script>
-  HTML
-end
-
-#HTML for displaying playlist
-def playlist_html songs
-  list = []
-
-  songs.each_with_index do |song, i|
-    list << "<li><a href=\"javascript:play_index(#{i})\">#{song.artist} - #{song.title}</a></li>"
-  end
-
-  <<-HTML
-    <div style="clear:both">&nbsp;</div>
-    <div id="playlist">
-      <ol>
-        #{list.join}
-      </ol>
-    </div>
-  HTML
-end
-
-#Javascript for playlist
-def playlist_js songs
-  <<-JAVASCRIPT
-  <script type="text/javascript">
-    var player = document.getElementById('player');
-    var artist = document.getElementById('artist');
-    var album = document.getElementById('album');
-    var title = document.getElementById('title');
-    var playlist = [#{songs.map { |s| song_to_js s }.join "," }]
-    var current_song = 0;
-
-    play_next = function(reverse) {
-      if(reverse && current_song > 0)
-        current_song--;
-      else if(!reverse && current_song < playlist.length)
-        current_song++;
-      else
-        return;
-
-      play_current();
-    }
-
-    play_current = function() {
-      var song = playlist[current_song];
-      player.src = song.path;
-      artist.innerHTML = song.artist
-      album.innerHTML = song.album
-      title.innerHTML = song.title
-      document.title = song.title + " by " + artist.firstChild.innerText;
-      player.play();
-    }
-
-    play_index = function(index) {
-      current_song = index;
-      play_current();  
-    }
-  </script>
-  JAVASCRIPT
-end
-
-#Javascript for a song
-def song_to_js song
-  <<-JAVASCRIPT
-  { artist: #{link("/artist", song.artist, song.artist).inspect},
-    album: #{link("/artist/#{song.artist}/album/", song.album, song.album).inspect},
-    title: #{song.title.inspect},
-    path: #{(CGI.escapeHTML "/" << CGI.escape(song.path)).inspect} }
-  JAVASCRIPT
-end
-
-#Back/forward links
-def prev_and_next
-  "<a href='javascript:play_next(true)'>Prev</a>&nbsp;&nbsp;&nbsp;<a href='javascript:play_next()'>Next</a>"
-end
-
-#Output HTML for player
-def player_html songs
-  html <<-HTML
-    <div id="playerbox">
-      #{song_info songs.first}<br/>
-      #{audio songs.first.path}<br/>
-      #{prev_and_next if songs.length > 1}
-      #{playlist_js songs}
-      #{playlist_html songs if songs.length > 1}
-      <div style="clear:both">#{link "/", "", "Back to All Music"}</div>
-    </div>
-  HTML
-end
-
-def play_all limit = 100, order = "normal"
-  songs = []
-
-  case order
-  when "random"
-    Music.values.each do |artist|
-      artist.values.each do |album|
-        album.values.each do |song|
-          songs << song
-        end
-      end
-    end
-
-    songs.shuffle!
-  else
-    Music.values.each do |artist|
-      artist.values.each do |album|
-        album.values.sort_by { |s| s.track }.each do |song|
-          songs << song
-        end
-      end
-    end
-  end
-
-  player_html songs[0..limit.to_i]
-end
-
-#HTML for playing all songs by artist
-def play_artist artist, order = "normal"
-  songs = []
-
-  case order
-  when "random"
-    Music[artist].each_value do |album|
-      album.each_value do |song|
-        songs << song
-      end
-    end
-
-    songs.shuffle!
-  else
-    Music[artist].each_value do |album|
-      album.values.sort_by { |s| s.track }.each do |song|
-        songs << song
-      end
-    end
-  end
-
-  player_html songs
-end
-
-#HTML for playing all songs on an album
-def play_album artist, album, order = "normal"
-
-  case order
-  when "random"
-    songs = Music[artist][album].values.shuffle!
-  else
-    songs = Music[artist][album].values.sort_by { |s| s.track }
-  end
-
-  player_html songs
-end
-
-#HTML for song information header
-def song_info song
-  "<span id='title'>#{song.title}</span> by <span id='artist'>#{link "/artist/", song.artist}</span><br/><span id='album'>#{link "/artist/#{song.artist}/album", song.album}</span>"
-end
-
-#Storing all music information in here
-Music = Hash.new do |h,k|
-  h[k] = Hash.new do |hash, key|
-    hash[key] = Hash.new
-  end
-end
-
-#Song information
-Song = Struct.new :artist, :album, :title, :track, :path
 
 #Used to figure out path to music files
 root = Pathname.new ARGV[0]
@@ -302,101 +27,42 @@ set :run, true
 
 $stderr.puts "Scanning music..."
 
-old_stderr = $stderr.dup
+music = TLS::Music.new(TLS::Finder.new(root, ARGV[0]))
 
-$stderr.reopen("/dev/null", "w")
-
-#Grab information from all the song files
-Dir.glob "#{ARGV[0]}/**/*.{mp3,ogg}", File::FNM_CASEFOLD do |file|
-  begin
-    info = TagLib2::File.new(file)
-
-    artist, album, title, track = info.artist, info.album, info.title, info.track
-    artist = "Unknown" if artist.nil? or artist.empty?
-    album = "Unknown" if album.nil? or album.empty?
-    
-    info = nil
-
-    if title
-      [artist, album, title].each { |i| i.tr!('/', '-') }
-      Music[artist][album][title] = Song.new(artist, album, title, track, Pathname.new(file).relative_path_from(root).to_s)
-    end
-  rescue Exception => e
-    $stderr.puts e if $DEBUG
-  end
+before do
+  @player = TLS::Player.new(music)
 end
-
-$stderr = old_stderr
-
-GC.start #Clean up after TagLib2
 
 #List artists
 get '/' do
-  path = '/artist/'
-  html <<-HTML
-    (Random
-    #{link("/", "all", "10", :limit => 10, :order => :random)}
-    #{link("/", "all", "50", :limit => 50, :order => :random) }
-    #{link("/", "all", "100", :limit => 100, :order => :random) })<br/><hr/>
-
-    #{Music.keys.sort.map { |a| link path, a }.join "<br/>"}<br/><br/>
-  HTML
+  @player.list_artists
 end
 
 get '/all' do
-  play_all params["limit"], params["order"]
+  @player.play_all params["limit"], params["order"]
 end
 
 #List albums by given artist
 get '/artist/:artist/?' do |artist|
-  unless Music[artist].empty?
-    path = "/artist/#{artist}/album/"
-    html title(artist) <<
-      Music[artist].keys.sort.map { |a| link path, a }.join("<br/>") << "<br/><br/>" <<
-      link("/artist/#{artist}/", "play", "Play All") << " - " <<
-      link("/artist/#{artist}/", "play", "Randomly", :order => :random)
-
-  else
-    html "Could not find <b>#{artist}</b>."
-  end
+  @player.list_albums_by artist
 end
 
 #Play songs by given artist
 get '/artist/:artist/play/?' do |artist|
-  unless Music[artist].empty?
-    play_artist artist, params["order"]
-  else
-    html "Could not find <b>#{artist}</b>."
-  end
+  @player.play_artist artist, params["order"]
 end
 
 #List songs on given album
 get '/artist/:artist/album/:album/?' do |artist, album|
-  unless Music[artist][album].empty?
-    path = "/artist/#{artist}/album/#{album}/song/"
-    html title(artist, album) <<
-      Music[artist][album].values.sort_by { |s| s.track || 0}.map { |s| link path, s.title }.join("<br/>") << "<br/><br/>" <<
-      link("/artist/#{artist}/album/#{album}/", "play", "Play All") << " - " <<
-      link("/artist/#{artist}/album/#{album}/", "play", "Randomly", :order => :random)
-  else
-    html "Could not find <b>#{album}</b> for <b>#{artist}</b>."
-  end
+  @player.list_songs_on artist, album
 end
 
 #Play all songs from a given album
 get '/artist/:artist/album/:album/play/?' do |artist, album|
-  if Music[artist][album]
-    play_album artist, album, params["order"]
-  else
-    html "Could not find <b>#{album}</b> by <b>#{artist}</b>."
-  end
+  @player.play_album artist, album, params["order"]
 end
 
 #Play song!
 get '/artist/:artist/album/:album/song/:song/?' do |artist, album, title|
-  if song = Music[artist][album][title]
-    player_html [song]
-  else
-    html "Could not find <b>#{title}</b> on <b>#{album}</b> by <b>#{artist}</b>."
-  end
+  @player.play_song artist, album, title
 end
