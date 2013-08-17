@@ -205,4 +205,15 @@ module TLS::HTML
     </div>
     HTML
   end
+
+  def search_box
+    <<-HTML
+    <div id="searchbox">
+      <form action="/search">
+        <label for="search">Search:</label>
+        <input type="text" />
+      </form>
+    </div>
+    HTML
+  end
 end

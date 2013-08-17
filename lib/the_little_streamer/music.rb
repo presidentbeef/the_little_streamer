@@ -29,6 +29,10 @@ class TLS::Music
     end
   end
 
+  def all_songs
+    @songs
+  end
+
   def has? artist, album = nil, title = nil
     not self[artist, album, title].empty?
   end

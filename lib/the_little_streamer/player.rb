@@ -8,9 +8,9 @@ class TLS::Player
   def play_all limit = 100, order = "normal"
     case order
     when "random"
-      songs = @music.songs.shuffle
+      songs = @music.all_songs.shuffle
     else
-      songs = @music.songs
+      songs = @music.all_songs
     end
 
     player_html songs[0..limit.to_i]
@@ -82,6 +82,7 @@ class TLS::Player
     #{link("/", "all", "10", :limit => 10, :order => :random)}
     #{link("/", "all", "50", :limit => 50, :order => :random) }
     #{link("/", "all", "100", :limit => 100, :order => :random) })
+    #{search_box}
     <br/><hr/>
     #{@music.artist_names.map { |a| link path, a }.join "<br/>"}
     <br/><br/>
@@ -92,16 +93,13 @@ class TLS::Player
     if @music.has? artist
       path = "/artist/#{artist}/album/"
 
-      puts "making page"
-      x = page <<-HTML
+      page <<-HTML
         #{title(artist)}
         #{@music.album_names_by(artist).map { |a| link path, a }.join("<br/>")}
         <br/><br/>
         #{link("/artist/#{artist}/", "play", "Play All")} - 
         #{link("/artist/#{artist}/", "play", "Randomly", :order => :random)}
         HTML
-        puts "down"
-        x
     else
       artist_not_found artist
     end
@@ -121,5 +119,9 @@ class TLS::Player
     else
       album_not_found artist, album
     end
+  end
+
+  def list_search search
+    songs = @music.find search
   end
 end
