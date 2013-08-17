@@ -1,4 +1,4 @@
-require 'taglib2'
+require 'taglib'
 require 'the_little_streamer/song'
 
 module TLS
@@ -19,24 +19,22 @@ module TLS
 
     def each_file
       @paths.each do |path|
-        Dir.glob "#{path}/**/*.{mp3,ogg}", File::FNM_CASEFOLD do |file|
+        Dir.glob "#{path}/**/*.{mp3,mP3,Mp3,MP3,ogg,Ogg,OGg,OGG,oGg,oGG,ogG,OgG}" do |file|
           yield file
         end
       end
     end
 
     def get_songs
-      puts "Gettings songs"
+      puts "Getting songs"
       @songs = []
 
-      quietly do
-        each_file do |file|
-          song = get_song file
+      each_file do |file|
+        song = get_song file
 
-          if song
-            @songs << song
-            yield song
-          end
+        if song
+          @songs << song
+          yield song
         end
       end
 
@@ -48,17 +46,20 @@ module TLS
       song = nil
 
       begin
-        info = TagLib2::File.new(file)
+        TagLib::FileRef.open(file) do |fileref|
+          info = fileref.tag
 
-        artist, album, title, track = info.artist, info.album, info.title, info.track
+          artist, album, title, track = info.artist, info.album, info.title, info.track
 
-        artist = "Unknown" if artist.nil? or artist.empty?
-        album = "Unknown" if album.nil? or album.empty?
+          artist = "Unknown" if artist.nil? or artist.empty?
+          album = "Unknown" if album.nil? or album.empty?
+          title = File.basename(file).split('.').first if title.nil? or title.empty?
 
-        if title
-          [artist, album, title].each { |i| i.tr!('/', '-') }
+          if title
+            [artist, album, title].each { |i| i.tr!('/', '-') }
 
-          song = Song.new(artist, album, title, track, Pathname.new(file).relative_path_from(@root).to_s)
+            song = Song.new(artist, album, title, track, Pathname.new(file).relative_path_from(@root).to_s)
+          end
         end
       rescue Exception => e
         p e
@@ -66,16 +67,6 @@ module TLS
       end
 
       song
-    end
-
-    def quietly
-      old_stderr = $stderr.dup
-
-      $stderr.reopen("/dev/null", "w")
-
-      yield
-
-      $stderr = old_stderr
     end
   end
 end
