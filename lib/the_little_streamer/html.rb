@@ -19,8 +19,8 @@ module TLS::HTML
       <script>
       if(document.getElementById('artist')) {
         window.onload = function() {
-         var artist = document.getElementById('artist').firstChild.innerText;
-         var title = document.getElementById('title').innerHTML;
+         var artist = document.getElementById('artist').firstChild.text;
+         var title = document.getElementById('title').textContent;
          document.title = title + " by " + artist;
         }
       }
@@ -159,7 +159,7 @@ module TLS::HTML
       artist.innerHTML = song.artist
       album.innerHTML = song.album
       title.innerHTML = song.title
-      document.title = song.title + " by " + artist.firstChild.innerText;
+      document.title = song.title + " by " + document.getElementById('artist').firstChild.text;
       player.play();
     }
 
