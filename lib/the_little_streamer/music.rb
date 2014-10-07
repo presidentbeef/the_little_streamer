@@ -1,4 +1,6 @@
 class TLS::Music
+  attr_reader :songs
+
   def initialize finder
     #Hash three levels deep for artist, album, and song
     @music = Hash.new do |h,k|
