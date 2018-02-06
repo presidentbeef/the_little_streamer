@@ -9,4 +9,5 @@ Gem::Specification.new do |s|
   s.executables = ["the_little_streamer"]
   s.add_dependency "sinatra", "~>1.3"
   s.add_dependency "taglib-ruby", "~>0.6"
+  s.license = "MIT"
 end
