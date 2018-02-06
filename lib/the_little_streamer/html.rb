@@ -87,9 +87,10 @@ module TLS::HTML
 
   #Create a link
   def link root, path, text = path, params = {}
-    full_path = root.split('/').map! {|r| URI.escape r }.join('/') << "/" << URI.escape(path)
-    params = params.map { |k, v| "#{k}=#{v}" }.join "&"
-    "<a href=\"#{full_path}?#{params}\">#{text}</a>"
+    full_path = root.split('/').map! {|r| ue r }.join('/') << "/" << ue(path)
+    params = params.map { |k, v| "#{ue(k)}=#{ue(v)}" }.join "&"
+
+    "<a href=\"#{full_path}?#{params}\">#{e text}</a>"
   end
 
   #Some navigation
@@ -104,7 +105,7 @@ module TLS::HTML
   #Audio tag
   def audio path
     <<-HTML
-  <audio id='player' onEnded='javascript:play_next()' src=#{("/" << URI.escape(path)).inspect} autobuffer controls autoplay >
+  <audio id="player" onEnded="javascript:play_next()" src="#{("/" << ue(path))}" autobuffer controls autoplay >
     You need the power of HTML5!
   </audio>
   <script type="text/javascript">
@@ -118,7 +119,7 @@ module TLS::HTML
     list = []
 
     songs.each_with_index do |song, i|
-      list << "<li><a href=\"javascript:play_index(#{i})\">#{song.artist} - #{song.title}</a></li>"
+      list << "<li><a href=\"javascript:play_index(#{i})\">#{e song.artist} - #{e song.title}</a></li>"
     end
 
     <<-HTML
@@ -177,18 +178,18 @@ module TLS::HTML
   { artist: #{link("/artist", song.artist, song.artist).inspect},
     album: #{link("/artist/#{song.artist}/album/", song.album, song.album).inspect},
     title: #{song.title.inspect},
-    path: #{(CGI.escapeHTML "/" << CGI.escape(song.path)).inspect} }
+    path: #{("/" << ue(song.path)).inspect} }
     JAVASCRIPT
   end
 
   #HTML for song information header
   def song_info song
-    "<span id='title'>#{song.title}</span> by <span id='artist'>#{link "/artist/", song.artist}</span><br/><span id='album'>#{link "/artist/#{song.artist}/album", song.album}</span>"
+    "<span id='title'>#{e song.title}</span> by <span id='artist'>#{link "/artist/", song.artist}</span><br/><span id='album'>#{link "/artist/#{song.artist}/album", song.album}</span>"
   end
 
   #Back/forward links
   def prev_and_next
-    @prev_and_next ||= "<a href='javascript:play_next(true)'>Prev</a>&nbsp;&nbsp;&nbsp;<a href='javascript:play_next()'>Next</a>"
+    @prev_and_next ||= '<a href="javascript:play_next(true)">Prev</a>&nbsp;&nbsp;&nbsp;<a href="javascript:play_next()">Next</a>'
     @prev_and_next
   end
 
@@ -204,5 +205,13 @@ module TLS::HTML
       <div style="clear:both">#{link "/", "", "Back to All Music"}</div>
     </div>
     HTML
+  end
+
+  def e str
+    CGI.escapeHTML str.to_s
+  end
+
+  def ue str
+    URI.escape str.to_s
   end
 end
