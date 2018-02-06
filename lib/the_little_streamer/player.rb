@@ -92,16 +92,13 @@ class TLS::Player
     if @music.has? artist
       path = "/artist/#{artist}/album/"
 
-      puts "making page"
-      x = page <<-HTML
+      page <<-HTML
         #{title(artist)}
         #{@music.album_names_by(artist).map { |a| link path, a }.join("<br/>")}
         <br/><br/>
         #{link("/artist/#{artist}/", "play", "Play All")} - 
         #{link("/artist/#{artist}/", "play", "Randomly", :order => :random)}
-        HTML
-        puts "down"
-        x
+      HTML
     else
       artist_not_found artist
     end
